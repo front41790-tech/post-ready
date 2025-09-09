@@ -91,17 +91,19 @@
             questionInput.value = "";
 
             // คำตอบแบบ Rule-based
+            const q = question.toLowerCase();
             let answer = "ขอโทษครับ ผมไม่เข้าใจคำถามนี้";
 
-            const q = question.toLowerCase();
-            if (q.includes("สวัสดี")) {
+            if (q.includes("สวัสดี") || q.includes("hello")) {
                 answer = "สวัสดีครับ! ยินดีต้อนรับ";
             } else if (q.includes("ชื่อ")) {
                 answer = "ผมคือเว็บบอททดลองครับ";
             } else if (q.includes("ทำอะไรได้")) {
-                answer = "ผมสามารถตอบคำถามง่าย ๆ และสนทนาเบื้องต้นได้";
+                answer = "ผมสามารถตอบคำถามง่าย ๆ แนะนำข้อมูล และสนทนาเบื้องต้นได้";
             } else if (q.includes("เว็บ")) {
                 answer = "คุณสามารถสร้างเว็บถามตอบนี้ได้ด้วย HTML, CSS และ JavaScript";
+            } else if (q.includes("ช่วย")) {
+                answer = "ผมพร้อมช่วยคุณทุกเรื่องที่ตอบได้ครับ!";
             }
 
             // แสดงข้อความตอบกลับ
