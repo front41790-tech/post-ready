@@ -3,40 +3,116 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>อยากรู้อะไร</title>
+    <title>เว็บถามตอบอัตโนมัติ</title>
     <style>
-        body { font-family: Arial, sans-serif; background: #f2f2f2; padding: 20px; }
-        h1 { color: #333; text-align: center; }
-        .container { max-width: 500px; margin: auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        input[type="text"] { width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 5px; border: 1px solid #ccc; font-size: 16px; }
-        button { padding: 10px 15px; margin-right: 5px; margin-top: 5px; cursor: pointer; border-radius: 5px; border: none; background: #4CAF50; color: white; font-size: 16px; }
-        button:hover { background: #45a049; }
-        .answer { margin-top: 15px; background: #f9f9f9; padding: 10px; border-radius: 5px; border: 1px solid #ccc; }
+        body {
+            font-family: Arial, sans-serif;
+            background: #f2f2f2;
+            padding: 20px;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+        }
+        button {
+            padding: 10px 15px;
+            cursor: pointer;
+            border-radius: 5px;
+            border: none;
+            background: #4CAF50;
+            color: white;
+            font-size: 16px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        #chat {
+            margin-top: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .message {
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            max-width: 80%;
+            word-wrap: break-word;
+        }
+        .user {
+            background-color: #d1e7dd;
+            text-align: right;
+            margin-left: auto;
+        }
+        .bot {
+            background-color: #f8d7da;
+            text-align: left;
+            margin-right: auto;
+        }
     </style>
 </head>
 <body>
-    <h1>อยากรู้อะไร</h1>
+    <h1>ถาม-ตอบอัตโนมัติ</h1>
     <div class="container">
-        <input type="text" id="question" placeholder="พิมพ์คำถามของคุณ เช่น 'รูปนี้คืออะไร'">
-        <div>
-            <button onclick="showAnswer1()">คำตอบ 1</button>
-            <button onclick="showAnswer2()">คำตอบ 2</button>
-        </div>
-        <div class="answer" id="answerBox">คำตอบจะแสดงที่นี่</div>
+        <input type="text" id="question" placeholder="พิมพ์คำถามของคุณ...">
+        <button onclick="askQuestion()">ถาม</button>
+        <div id="chat"></div>
     </div>
 
     <script>
-        function showAnswer1() {
-            const q = document.getElementById('question').value;
-            const box = document.getElementById('answerBox');
-            box.textContent = `คุณถามว่า: "${q}"\nคำตอบ 1: นี่คือคำตอบตัวอย่างสำหรับคำถามของคุณ`;
-        }
+        function askQuestion() {
+            const questionInput = document.getElementById("question");
+            const chat = document.getElementById("chat");
+            const question = questionInput.value.trim();
+            if (!question) return;
 
-        function showAnswer2() {
-            const q = document.getElementById('question').value;
-            const box = document.getElementById('answerBox');
-            box.textContent = `คุณถามว่า: "${q}"\nคำตอบ 2: อีกคำตอบหนึ่งสำหรับคำถามของคุณ พร้อมอธิบายเพิ่มเติม`;
+            // แสดงข้อความผู้ใช้
+            const userMsg = document.createElement("div");
+            userMsg.className = "message user";
+            userMsg.innerText = question;
+            chat.appendChild(userMsg);
+
+            // ล้าง input
+            questionInput.value = "";
+
+            // คำตอบแบบ Rule-based
+            let answer = "ขอโทษครับ ผมไม่เข้าใจคำถามนี้";
+
+            const q = question.toLowerCase();
+            if (q.includes("สวัสดี")) {
+                answer = "สวัสดีครับ! ยินดีต้อนรับ";
+            } else if (q.includes("ชื่อ")) {
+                answer = "ผมคือเว็บบอททดลองครับ";
+            } else if (q.includes("ทำอะไรได้")) {
+                answer = "ผมสามารถตอบคำถามง่าย ๆ และสนทนาเบื้องต้นได้";
+            } else if (q.includes("เว็บ")) {
+                answer = "คุณสามารถสร้างเว็บถามตอบนี้ได้ด้วย HTML, CSS และ JavaScript";
+            }
+
+            // แสดงข้อความตอบกลับ
+            const botMsg = document.createElement("div");
+            botMsg.className = "message bot";
+            botMsg.innerText = answer;
+            chat.appendChild(botMsg);
+
+            // เลื่อนอัตโนมัติ
+            chat.scrollTop = chat.scrollHeight;
         }
     </script>
 </body>
-</html>
+    </html>
