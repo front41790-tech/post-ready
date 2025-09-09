@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>โพสต์สำเร็จรูป</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f2f2f2; padding: 20px; }
+        h1, h2 { color: #333; }
+        .message-box { background: #fff; padding: 15px; margin-bottom: 10px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .message-text { font-size: 18px; margin-bottom: 10px; }
+        button { margin-right: 5px; margin-top: 5px; padding: 5px 10px; cursor: pointer; border-radius: 5px; border: 1px solid #ccc; background: #eee; }
+        button:hover { background: #ddd; }
+        input[type="text"] { width: 70%; padding: 8px; margin-right: 5px; border-radius: 5px; border: 1px solid #ccc; }
+    </style>
+</head>
+<body>
+    <h1>โพสต์สำเร็จรูป</h1>
+
+    <div id="messages"></div>
+
+    <h2>สร้างข้อความเอง</h2>
+    <input type="text" id="customMessage" placeholder="พิมพ์ข้อความของคุณ">
+    <button onclick="copyCustom()">คัดลอก</button>
+    <button onclick="shareCustom()">แชร์ไป Facebook</button>
+
+    <script>
+        const messages = [
+            "ร้านนี้อร่อยมาลองกิน",
+            "พรุ่งนี้มีโปรลดราคาอย่าพลาด",
+            "อาหารที่นี่อร่อยทุกอย่าง",
+            "ชวนเพื่อนมากินด้วยกันสิ",
+            "เมนูใหม่มาแล้ว ลองเลย!"
+        ];
+
+        const container = document.getElementById('messages');
+
+        messages.forEach(msg => {
+            const box = document.createElement('div');
+            box.className = 'message-box';
+
+            const text = document.createElement('div');
+            text.className = 'message-text';
+            text.textContent = msg;
+
+            const copyBtn = document.createElement('button');
+            copyBtn.textContent = 'คัดลอก';
+            copyBtn.onclick = () => {
+                navigator.clipboard.writeText(msg);
+                alert('คัดลอกแล้ว!');
+            };
+
+            const shareBtn = document.createElement('button');
+            shareBtn.textContent = 'แชร์ไป Facebook';
+            shareBtn.onclick = () => {
+                const url = `https://www.facebook.com/sharer/sharer.php?u=&quote=${encodeURIComponent(msg)}`;
+                window.open(url, '_blank');
+            };
+
+            box.appendChild(text);
+            box.appendChild(copyBtn);
+            box.appendChild(shareBtn);
+            container.appendChild(box);
+        });
+
+        function copyCustom() {
+            const msg = document.getElementById('customMessage').value;
+            if(msg.trim() === "") { alert("กรุณาพิมพ์ข้อความก่อน!"); return; }
+            navigator.clipboard.writeText(msg);
+            alert('คัดลอกแล้ว!');
+        }
+
+        function shareCustom() {
+            const msg = document.getElementById('customMessage').value;
+            if(msg.trim() === "") { alert("กรุณาพิมพ์ข้อความก่อน!"); return; }
+            const url = `https://www.facebook.com/sharer/sharer.php?u=&quote=${encodeURIComponent(msg)}`;
+            window.open(url, '_blank');
+        }
+    </script>
+</body>
+</html>
