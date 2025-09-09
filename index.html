@@ -25,6 +25,7 @@
     <button onclick="shareCustom()">แชร์ไป Facebook</button>
 
     <script>
+        // ใส่ข้อความตัวอย่าง
         const messages = [
             "ร้านนี้อร่อยมาลองกิน",
             "พรุ่งนี้มีโปรลดราคาอย่าพลาด",
@@ -53,8 +54,9 @@
             const shareBtn = document.createElement('button');
             shareBtn.textContent = 'แชร์ไป Facebook';
             shareBtn.onclick = () => {
-                const url = `https://www.facebook.com/sharer/sharer.php?u=&quote=${encodeURIComponent(msg)}`;
-                window.open(url, '_blank');
+                const urlToShare = 'https://username.github.io/post-ready/'; // เปลี่ยนเป็นลิงก์ GitHub Pages ของคุณ
+                const fbUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(urlToShare)}&quote=${encodeURIComponent(msg)}`;
+                window.open(fbUrl, '_blank');
             };
 
             box.appendChild(text);
@@ -73,9 +75,10 @@
         function shareCustom() {
             const msg = document.getElementById('customMessage').value;
             if(msg.trim() === "") { alert("กรุณาพิมพ์ข้อความก่อน!"); return; }
-            const url = `https://www.facebook.com/sharer/sharer.php?u=&quote=${encodeURIComponent(msg)}`;
-            window.open(url, '_blank');
+            const urlToShare = 'https://username.github.io/post-ready/'; // เปลี่ยนเป็นลิงก์เว็บของคุณ
+            const fbUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(urlToShare)}&quote=${encodeURIComponent(msg)}`;
+            window.open(fbUrl, '_blank');
         }
     </script>
 </body>
-</html>
+</html></html>
