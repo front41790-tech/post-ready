@@ -1,161 +1,100 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>แชทบอทอัจฉริยะ</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>แชทบอท</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #eceff1;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-    }
-    .chat-container {
-      width: 100%;
-      max-width: 600px;
-      height: 90vh;
-      background: #fff;
-      border-radius: 10px;
-      display: flex;
-      flex-direction: column;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-    }
-    .chat-header {
-      background: #4CAF50;
-      color: #fff;
-      padding: 15px;
-      font-size: 18px;
-      text-align: center;
-      border-radius: 10px 10px 0 0;
-    }
-    .chat-box {
-      flex: 1;
-      padding: 15px;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-    }
-    .message {
-      max-width: 70%;
-      padding: 10px 15px;
-      margin: 5px 0;
-      border-radius: 15px;
-      word-wrap: break-word;
-      animation: fadeIn 0.3s ease;
-    }
-    .user {
-      background: #d1e7dd;
-      align-self: flex-end;
-      border-bottom-right-radius: 5px;
-    }
-    .bot {
-      background: #f8d7da;
-      align-self: flex-start;
-      border-bottom-left-radius: 5px;
-    }
-    .chat-input {
-      display: flex;
-      border-top: 1px solid #ddd;
-    }
-    .chat-input input {
-      flex: 1;
-      padding: 15px;
-      border: none;
-      outline: none;
-      font-size: 16px;
-      border-radius: 0 0 0 10px;
-    }
-    .chat-input button {
-      padding: 15px 20px;
-      border: none;
-      background: #4CAF50;
-      color: #fff;
-      font-size: 16px;
-      cursor: pointer;
-      border-radius: 0 0 10px 0;
-    }
-    .chat-input button:hover {
-      background: #45a049;
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
+    body { font-family: Arial, sans-serif; background: #eef2f5; margin: 0; padding: 20px; }
+    .wrap { max-width: 720px; margin: 0 auto; background: #fff; border-radius: 8px; padding: 16px; box-shadow: 0 6px 18px rgba(0,0,0,0.08); }
+    .chat { height: 420px; overflow: auto; border: 1px solid #ddd; padding: 12px; border-radius: 6px; background: #fbfdff; }
+    .msg { margin: 8px 0; max-width: 80%; padding: 10px; border-radius: 12px; }
+    .user { background: #d1e7dd; margin-left: auto; text-align: right; }
+    .bot { background: #f8d7da; margin-right: auto; text-align: left; }
+    .controls { display: flex; gap: 8px; margin-top: 10px; }
+    input[type=text] { flex: 1; padding: 10px; border-radius: 6px; border: 1px solid #ccc; }
+    button { padding: 10px 12px; border-radius: 6px; border: none; background: #4caf50; color: #fff; cursor: pointer; }
   </style>
+  <!-- Fuse.js -->
+  <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2/dist/fuse.min.js"></script>
 </head>
 <body>
-  <div class="chat-container">
-    <div class="chat-header">💬 แชทบอทอัจฉริยะ</div>
-    <div class="chat-box" id="chatBox"></div>
-    <div class="chat-input">
-      <input type="text" id="question" placeholder="พิมพ์ข้อความของคุณ...">
-      <button onclick="askQuestion()">ส่ง</button>
+  <div class="wrap">
+    <h2>แชทบอท (เวอร์ชัน HTML เดียว)</h2>
+    <div id="chat" class="chat"></div>
+
+    <div class="controls">
+      <input id="q" type="text" placeholder="พิมพ์คำถามของคุณ..." />
+      <button id="send">ถาม</button>
     </div>
   </div>
 
   <script>
-    const chatBox = document.getElementById("chatBox");
+    // ====== Q&A เริ่มต้น ======
+    let qaDatabase = [
+      { q: "สวัสดี", a: "สวัสดีครับ ยินดีที่ได้คุยด้วย" },
+      { q: "ชื่ออะไร", a: "ผมคือแชทบอทตัวอย่างครับ" },
+      { q: "ทำอะไรได้", a: "ผมตอบคำถามง่าย ๆ และเรียนรู้คำถามใหม่จากคุณได้" },
+      { q: "ขอบคุณ", a: "ยินดีครับ 😊" },
+      { q: "ทำไร", a: "ก็คุยกับคุณอยู่นี่แหละครับ" }
+    ];
 
-    function addMessage(text, sender) {
-      const msg = document.createElement("div");
-      msg.className = "message " + sender;
-      msg.innerText = text;
-      chatBox.appendChild(msg);
+    // ====== โหลดจาก localStorage ======
+    const STORAGE_KEY = "chatbot_logs_v1";
+    let logs = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+    qaDatabase = [...qaDatabase, ...logs];
+
+    // ====== Fuse.js ======
+    let fuseOptions = {
+      keys: ["q"],
+      threshold: 0.35,
+      includeScore: true,
+      ignoreLocation: true
+    };
+    let fuse = new Fuse(qaDatabase, fuseOptions);
+
+    // ====== DOM ======
+    const chatBox = document.getElementById("chat");
+    const input = document.getElementById("q");
+    const sendBtn = document.getElementById("send");
+
+    function addMessage(text, cls) {
+      const div = document.createElement("div");
+      div.className = "msg " + cls;
+      div.innerText = text;
+      chatBox.appendChild(div);
       chatBox.scrollTop = chatBox.scrollHeight;
     }
 
-    function askQuestion() {
-      const input = document.getElementById("question");
-      const question = input.value.trim();
-      if (!question) return;
-
-      addMessage(question, "user");
-      input.value = "";
-
-      setTimeout(() => {
-        const answer = getBotAnswer(question);
-        addMessage(answer, "bot");
-      }, 500); // ดีเลย์ให้เหมือนคิดอยู่
+    function saveLog(q, a) {
+      logs.push({ q, a });
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(logs));
     }
 
-    function getBotAnswer(q) {
-      const text = q.toLowerCase();
-
-      if (text.includes("สวัสดี")) {
-        const replies = ["สวัสดีครับ! 😊", "สวัสดีครับ มีอะไรให้ช่วยมั้ย?", "เฮ้! ดีใจที่ได้คุยกับคุณ"];
-        return randomReply(replies);
-      } else if (text.includes("ชื่อ")) {
-        return "ผมคือแชทบอททดลอง ที่สร้างด้วย HTML + JS ครับ";
-      } else if (text.includes("ทำอะไรได้")) {
-        const replies = [
-          "ผมตอบคำถามง่าย ๆ ได้",
-          "ผมสามารถจำบทสนทนากับคุณได้",
-          "ผมคุยเล่นแก้เหงาได้ครับ"
-        ];
-        return randomReply(replies);
-      } else if (text.includes("ขอบคุณ")) {
-        return "ยินดีเสมอครับ 🙏";
-      } else if (text.includes("เว็บ")) {
-        return "นี่คือตัวอย่างเว็บถามตอบที่คุณสามารถนำไปต่อยอดได้เลยครับ";
+    function findAnswer(q) {
+      const result = fuse.search(q);
+      if (result.length && result[0].score < 0.45) {
+        return result[0].item.a;
       }
-
-      // คำตอบเริ่มต้น
-      const defaultReplies = [
-        "น่าสนใจนะ แต่ผมยังไม่เข้าใจดีนัก",
-        "อธิบายเพิ่มอีกหน่อยได้ไหมครับ?",
-        "อืม...คำถามนี้ยากไปหน่อย 😅",
-        "ขอโทษครับ ผมยังตอบเรื่องนี้ไม่ได้"
-      ];
-      return randomReply(defaultReplies);
+      return null;
     }
 
-    function randomReply(arr) {
-      return arr[Math.floor(Math.random() * arr.length)];
+    function sendQuestion() {
+      const q = input.value.trim();
+      if (!q) return;
+      input.value = "";
+      addMessage(q, "user");
+
+      let ans = findAnswer(q);
+      if (!ans) {
+        ans = "ขอโทษครับ ผมยังไม่เข้าใจคำถามนี้ แต่ผมจะจำไว้ครับ";
+        saveLog(q, ans); // บันทึกคำถามที่ไม่รู้
+      }
+      setTimeout(() => addMessage(ans, "bot"), 400);
     }
+
+    sendBtn.addEventListener("click", sendQuestion);
+    input.addEventListener("keydown", e => { if (e.key === "Enter") sendQuestion(); });
   </script>
 </body>
 </html>
